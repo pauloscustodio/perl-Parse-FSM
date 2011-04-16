@@ -14,8 +14,6 @@ WriteMakefile(
     ($ExtUtils::MakeMaker::VERSION >= 6.3002
       ? ('LICENSE'=> 'perl')
       : ()),
-#    PL_FILES            => {'tools/build_parser.pl' 
-#							=> 'blib/lib/Parse/FSM/Grammar.pm'},
     PREREQ_PM => {
 		'Capture::Tiny'			=> 0.10,
 		'Class::XSAccessor'		=> 1.11,
