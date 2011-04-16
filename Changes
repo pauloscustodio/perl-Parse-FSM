@@ -1,0 +1,20 @@
+Revision history for Parse-FSM
+
+1.00	2011-04-16
+
+	Spin-off of the deterministic top-down parser based on a pre-computed
+	finite state machine that was developped for the CPU::Z80::Assembler
+	module. 
+
+	New Features
+	
+	* parse a yacc-like BNF grammar and generate the parser module.
+	  Note: the Parse::FSM::Parser module used to parse the BNF grammar 
+	  is generated using the primitive add_rule from Parse::FSM.
+	  
+	* Lexer module based on Perl 5.10 regular expressions, to be subclassed.
+	  The Parse::FSM::Lexer provides the primitives to allow recursive 
+	  file includes and keeping track of current file and line number. A
+	  subclass can override the tokenizer() method that matches the next 
+	  token from a string.
+
