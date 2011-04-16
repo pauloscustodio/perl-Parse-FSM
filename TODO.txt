@@ -1,0 +1,16 @@
+- $item[0] - rule name; @item[1..$#item] - values of items
+- %item to access by name
+- subrule argument lists @arg %arg; call by classdecl: keyword decl[ $item[1] ]
+- code within rules
+- <error> | <error: message>
+
+X autoaction: { [@item] } >
+X More standard syntax: rule : non_terminal 'terminal'
+X Parse::FSM should be the compiler class, create a Parse::FSM::Driver as run-time
+X option to hide package name from CPAN indexer by writing "package\n$name;"
+X parentheses to create sub-rules
+X <eof>
+X start start- Parser of BNF style grammar file, no need to call add_rule()
+X script form to pre-compile parser
+X leftop / rightop
+X integrate lexer?
