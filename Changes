@@ -1,5 +1,12 @@
 Revision history for Parse-FSM
 
+1.01	2011-04-17
+
+	Bug Fixes
+	
+	* FSM-error.t failed on case-sensitive file systems (data and Data 
+	  directories are the same in Windows, but not in Unix)
+
 1.00	2011-04-16
 
 	Spin-off of the deterministic top-down parser based on a pre-computed
