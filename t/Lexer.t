@@ -1,6 +1,6 @@
 #!perl
 
-# $Id: Lexer.t,v 1.2 2010/10/12 21:18:13 Paulo Exp $
+# $Id: Lexer.t,v 1.1 2011/04/16 20:20:44 Paulo Exp $
 
 use 5.010;
 use strict;
@@ -41,7 +41,7 @@ $lex = new_ok('Parse::FSM::Lexer', [$file]);
 t_get();
 
 #------------------------------------------------------------------------------
-# file with data
+# file with Data
 ($fh, $file) = new_tempfile(); 
 print $fh $input;
 close $fh;
@@ -56,7 +56,7 @@ t_get($file, 4, NUM => 4);
 t_get();
 
 #------------------------------------------------------------------------------
-# file with data, pass on constructor
+# file with Data, pass on constructor
 ($fh, $file) = new_tempfile(); 
 print $fh $input;
 close $fh;
@@ -70,19 +70,19 @@ t_get();
 
 #------------------------------------------------------------------------------
 # pass two files to constructor, read in correct order
-$lex = new_ok('Parse::FSM::Lexer', ['t/data/f01.asm', 't/data/f02.asm']);
+$lex = new_ok('Parse::FSM::Lexer', ['t/Data/f01.asm', 't/Data/f02.asm']);
 
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
 t_get();
 
 #------------------------------------------------------------------------------
 # one file to constructor, other included
-$lex = new_ok('Parse::FSM::Lexer', ['t/data/f02.asm']);
-$lex->from_file('t/data/f01.asm');
+$lex = new_ok('Parse::FSM::Lexer', ['t/Data/f02.asm']);
+$lex->from_file('t/Data/f01.asm');
 
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
 t_get();
 
 #------------------------------------------------------------------------------
@@ -184,72 +184,72 @@ t_get();
 #------------------------------------------------------------------------------
 # #include as list
 $lex = new_ok('Parse::FSM::Lexer');
-$lex->from_list('#include "t/data/f01.asm"', 
-				"#include 't/data/f02.asm'", 
-				"#include  t/data/f01.asm ",
-				"#include <t/data/f02.asm>",);
+$lex->from_list('#include "t/Data/f01.asm"', 
+				"#include 't/Data/f02.asm'", 
+				"#include  t/Data/f01.asm ",
+				"#include <t/Data/f02.asm>",);
 
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
 t_get();
 
 #------------------------------------------------------------------------------
 # #include error
-$lex = new_ok('Parse::FSM::Lexer', ['t/data/f03.asm']);
+$lex = new_ok('Parse::FSM::Lexer', ['t/Data/f03.asm']);
 eval { $lex->get_token };
 
-is $@, "t/data/f03.asm(1) Error #include expects a file name\n", "wrong syntax";
+is $@, "t/Data/f03.asm(1) Error #include expects a file name\n", "wrong syntax";
 
 #------------------------------------------------------------------------------
 # #include from file
 $lex = new_ok('Parse::FSM::Lexer');
-$lex->from_file('t/data/f04.asm');
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
+$lex->from_file('t/Data/f04.asm');
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
 t_get();
 
 #------------------------------------------------------------------------------
 # #include from file
 $lex = new_ok('Parse::FSM::Lexer');
-$lex->from_list("#include 't/data/include.z80'");
+$lex->from_list("#include 't/Data/include.z80'");
 
-t_get('t/data/include.z80', 1, NAME => "NOP");
-t_get('t/data/include.z80', 2, NAME => "NOP");
+t_get('t/Data/include.z80', 1, NAME => "NOP");
+t_get('t/Data/include.z80', 2, NAME => "NOP");
 t_get();
 
 #------------------------------------------------------------------------------
 # #include from file
 $lex = new_ok('Parse::FSM::Lexer');
-$lex->from_list("#include 't/data/include3.z80'");
+$lex->from_list("#include 't/Data/include3.z80'");
 
-t_get('t/data/include3.z80', 1, NAME => "LD", NAME => "B", "," => ",", NUM => 1);
-t_get('t/data/include2.z80', 1,	NAME => "LD", NAME => "A", "," => ",", NUM => 1);
+t_get('t/Data/include3.z80', 1, NAME => "LD", NAME => "B", "," => ",", NUM => 1);
+t_get('t/Data/include2.z80', 1,	NAME => "LD", NAME => "A", "," => ",", NUM => 1);
 
-t_get('t/data/include.z80', 1, NAME => "NOP");
-t_get('t/data/include.z80', 2, NAME => "NOP");
+t_get('t/Data/include.z80', 1, NAME => "NOP");
+t_get('t/Data/include.z80', 2, NAME => "NOP");
 
-t_get('t/data/include2.z80', 3,	NAME => "LD", NAME => "A", "," => ",", NUM => 3);
+t_get('t/Data/include2.z80', 3,	NAME => "LD", NAME => "A", "," => ",", NUM => 3);
 
-t_get('t/data/include.z80', 1, NAME => "NOP");
-t_get('t/data/include.z80', 2, NAME => "NOP");
+t_get('t/Data/include.z80', 1, NAME => "NOP");
+t_get('t/Data/include.z80', 2, NAME => "NOP");
 
-t_get('t/data/include2.z80', 5,	NAME => "LD", NAME => "A", "," => ",", NUM => 5);
+t_get('t/Data/include2.z80', 5,	NAME => "LD", NAME => "A", "," => ",", NUM => 5);
 
-t_get('t/data/include.z80', 1, NAME => "NOP");
-t_get('t/data/include.z80', 2, NAME => "NOP");
+t_get('t/Data/include.z80', 1, NAME => "NOP");
+t_get('t/Data/include.z80', 2, NAME => "NOP");
 
-t_get('t/data/include2.z80', 7,	NAME => "LD", NAME => "A", "," => ",", NUM => 7);
+t_get('t/Data/include2.z80', 7,	NAME => "LD", NAME => "A", "," => ",", NUM => 7);
 
-t_get('t/data/include.z80', 1, NAME => "NOP");
-t_get('t/data/include.z80', 2, NAME => "NOP");
+t_get('t/Data/include.z80', 1, NAME => "NOP");
+t_get('t/Data/include.z80', 2, NAME => "NOP");
 
-t_get('t/data/include2.z80', 9,	NAME => "LD", NAME => "A", "," => ",", NUM => 9);
+t_get('t/Data/include2.z80', 9,	NAME => "LD", NAME => "A", "," => ",", NUM => 9);
 
-t_get('t/data/include3.z80', 3, NAME => "LD", NAME => "B", "," => ",", NUM => 3);
+t_get('t/Data/include3.z80', 3, NAME => "LD", NAME => "B", "," => ",", NUM => 3);
 
 t_get();
 
@@ -257,30 +257,30 @@ t_get();
 # path_search
 $lex = new_ok('Parse::FSM::Lexer');
 is_deeply [$lex->path], [], "empty path";
-$lex->add_path('t/data');
-is_deeply [$lex->path], ['t/data'], "one in path";
-$lex->add_path('t/data/sub');
-is_deeply [$lex->path], ['t/data', 't/data/sub'], "two in path";
+$lex->add_path('t/Data');
+is_deeply [$lex->path], ['t/Data'], "one in path";
+$lex->add_path('t/Data/sub');
+is_deeply [$lex->path], ['t/Data', 't/Data/sub'], "two in path";
 
-is $lex->path_search('t/data/f01.asm'), 't/data/f01.asm', 
+is $lex->path_search('t/Data/f01.asm'), 't/Data/f01.asm', 
 							"path search, file found before search";
 is $lex->path_search('NO FILE'), 'NO FILE', 
 							"path search, file not found";
-like $lex->path_search('f01.asm'), qr{t[\\/]data[\\/]f01.asm}, 
+like $lex->path_search('f01.asm'), qr{t[\\/]Data[\\/]f01.asm}, 
 							"path search, file found in first dir";
-like $lex->path_search('f11.asm'), qr{t[\\/]data[\\/]sub[\\/]f11.asm}, 
+like $lex->path_search('f11.asm'), qr{t[\\/]Data[\\/]sub[\\/]f11.asm}, 
 							"path search, file found in second dir";
 
 $lex->from_file('f06.asm');
-t_get('t/data/f01.asm',	1, NAME => "hello");
-t_get('t/data/f02.asm',	1, NAME => "world");
+t_get('t/Data/f01.asm',	1, NAME => "hello");
+t_get('t/Data/f02.asm',	1, NAME => "world");
 t_get();
 
 #------------------------------------------------------------------------------
 # recursive include
-$lex = new_ok('Parse::FSM::Lexer', ['t/data/f07.asm']);
+$lex = new_ok('Parse::FSM::Lexer', ['t/Data/f07.asm']);
 eval { $lex->get_token };
-is $@, "t/data/f08.asm(1) Error #include loop\n",
+is $@, "t/Data/f08.asm(1) Error #include loop\n",
 			"#include loop";
 
 #------------------------------------------------------------------------------
