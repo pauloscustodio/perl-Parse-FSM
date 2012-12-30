@@ -1,4 +1,4 @@
-# $Id: Lexer.pm,v 1.2 2011/04/17 20:24:31 Paulo Exp $
+# $Id: Lexer.pm,v 1.3 2011/04/21 08:44:17 Paulo Exp $
 
 package Parse::FSM::Lexer;
 
@@ -19,7 +19,7 @@ use warnings;
 use File::Spec;
 use Data::Dump 'dump';
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 #------------------------------------------------------------------------------
 
@@ -222,8 +222,8 @@ sub from_file {
 	# create a new iterator to read file lines
 	my $input = sub {
 		$fh or return;
-		my $_ = <$fh>;
-		return $_ if defined;
+		my $line = <$fh>;
+		return $line if defined $line;
 		$fh = undef;		# free handle when file ends
 		return;
 	};
