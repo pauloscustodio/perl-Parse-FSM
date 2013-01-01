@@ -1,4 +1,4 @@
-# $Id: Lexer.pm,v 1.3 2011/04/21 08:44:17 Paulo Exp $
+# $Id: Lexer.pm,v 1.4 2012/12/30 20:09:50 Paulo Exp $
 
 package Parse::FSM::Lexer;
 
@@ -19,7 +19,7 @@ use warnings;
 use File::Spec;
 use Data::Dump 'dump';
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 #------------------------------------------------------------------------------
 

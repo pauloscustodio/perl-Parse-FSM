@@ -1,4 +1,4 @@
-# $Id: Driver.pm,v 1.3 2011/04/21 08:44:12 Paulo Exp $
+# $Id: Driver.pm,v 1.4 2012/12/30 20:09:43 Paulo Exp $
 
 package Parse::FSM::Driver;
 
@@ -18,7 +18,7 @@ use strict;
 use Carp; our @CARP_NOT = ('Parse::FSM::Driver');
 use Data::Dump 'dump';
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 #------------------------------------------------------------------------------
 
@@ -115,13 +115,15 @@ with token type and token value C<[$type, $value]>.
 It returns C<undef> on end of input. E.g. for a simple expression lexer:
 
   sub make_lexer {
-    my($_) = @_;
+    my($line) = @_;
     return sub {
-      /\G\s+/gc;
-      return [NUM  => $1] if /\G(\d+)/gc;
-      return [NAME => $1] if /\G([a-z]\w*)/gci;
-      return [$1   => $1] if /\G(.)/gc;
-      return;
+      for ($line) {
+        /\G\s+/gc;
+        return [NUM  => $1] if /\G(\d+)/gc;
+        return [NAME => $1] if /\G([a-z]\w*)/gci;
+        return [$1   => $1] if /\G(.)/gc;
+        return;
+      }
     };
   }
   $parser->input(make_lexer("2+3*4"));
