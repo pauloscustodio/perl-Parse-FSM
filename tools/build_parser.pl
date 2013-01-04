@@ -1,5 +1,5 @@
 #!perl
-# $Id: Preproc.pm,v 1.7 2010/10/15 15:55:21 Paulo Exp $
+# $Id: build_parser.pl,v 1.1 2011/04/16 20:20:46 Paulo Exp $
 
 #------------------------------------------------------------------------------
 # Create Parse::FSM::Parse to parse a yacc-like grammar
@@ -35,54 +35,56 @@ sub fsm { return shift->user->{fsm} }
 
 # read the given input string
 sub from {
-	my($self, $_) = @_;
+	my($self, $line) = @_;
 	
 	$self->input(sub {
-		/\G(?:\s+|#.*)+/gc;		# skip blanks and comments
-		
-		/\G([a-z]\w*)/gci and do {
-			return [NAME => $1];
-		};
-		/\G(?=["'])/gc and do {
-			my $start_pos = pos();
-			my($quoted_string, $rest) = extract_quotelike($_);
-			if (defined $quoted_string) {
-				my $token = eval($quoted_string); ## no critic
-				if (! $@) {
-					pos() = length() - length($rest);
-					return [TOKEN => $token];
+		for ($line) {
+			/\G(?:\s+|#.*)+/gc;		# skip blanks and comments
+			
+			/\G([a-z]\w*)/gci and do {
+				return [NAME => $1];
+			};
+			/\G(?=["'])/gc and do {
+				my $start_pos = pos();
+				my($quoted_string, $rest) = extract_quotelike($_);
+				if (defined $quoted_string) {
+					my $token = eval($quoted_string); ## no critic
+					if (! $@) {
+						pos() = length() - length($rest);
+						return [TOKEN => $token];
+					}
 				}
-			}
-			
-			# could not parse quoted string, die
-			$rest = substr($_, $start_pos, 100);
-			die "Cannot parse quoted string at ", dump($rest), "\n";
-		};
-		/\G(?=[\{])/gc and do {
-			my $start_pos = pos();
-			my($code_block, $rest) = extract_codeblock($_);
-			if (defined $code_block) {
-				pos() = length() - length($rest);
-				return [CODE => $code_block];
-			}
-			
-			# could not parse quoted string, die
-			$rest = substr($_, $start_pos, 100);
-			die "Cannot parse code block at ", dump($rest), "\n";
-		};
-		/\G(%\w+)/gc and do {					# directives
-			return [$1 => $1];
-		};
-		/\G(<\+)\s*([^>\s]+)\s*>/gc and do {	# list quantifier
-			return [$1 => $2];					# ['<+' => ',']
-		};
-		/\G(<\w+)/gc and do {					# directive
-			return [$1 => $1];					# ['<start' => '<start']
-		};
-		/\G(.)/gc and do {
-			return [$1 => $1];
-		};
-		return;	# end of input
+				
+				# could not parse quoted string, die
+				$rest = substr($_, $start_pos, 100);
+				die "Cannot parse quoted string at ", dump($rest), "\n";
+			};
+			/\G(?=[\{])/gc and do {
+				my $start_pos = pos();
+				my($code_block, $rest) = extract_codeblock($_);
+				if (defined $code_block) {
+					pos() = length() - length($rest);
+					return [CODE => $code_block];
+				}
+				
+				# could not parse quoted string, die
+				$rest = substr($_, $start_pos, 100);
+				die "Cannot parse code block at ", dump($rest), "\n";
+			};
+			/\G(%\w+)/gc and do {					# directives
+				return [$1 => $1];
+			};
+			/\G(<\+)\s*([^>\s]+)\s*>/gc and do {	# list quantifier
+				return [$1 => $2];					# ['<+' => ',']
+			};
+			/\G(<\w+)/gc and do {					# directive
+				return [$1 => $1];					# ['<start' => '<start']
+			};
+			/\G(.)/gc and do {
+				return [$1 => $1];
+			};
+			return;	# end of input
+		}
 	});
 	return;
 }
