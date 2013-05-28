@@ -1,3 +1,10 @@
+1.07	2013-05-28
+
+	Bug Fixes
+	* Fix: Use of each() on hash after insertion without resetting hash 
+	  iterator results in undefined behavior, Perl interpreter: 
+	  0x8c8010 at blib/lib/Parse/FSM.pm line 401.
+
 1.06	2013-01-06
 
 	Other
