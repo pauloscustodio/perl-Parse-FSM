@@ -1,3 +1,10 @@
+1.08	2013-07-25
+	Bug Fixes
+	* Wrong handling of backslash in strings.
+
+	New Features
+	* Allow special token handlers to be changed by a subclass
+
 1.07	2013-05-28
 
 	Bug Fixes
