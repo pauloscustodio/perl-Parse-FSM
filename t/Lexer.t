@@ -1,6 +1,6 @@
 #!perl
 
-# $Id: Lexer.t,v 1.1 2011/04/16 20:20:44 Paulo Exp $
+# $Id: Lexer.t,v 1.2 2011/04/21 08:44:28 Paulo Exp $
 
 use 5.010;
 use strict;
@@ -338,11 +338,13 @@ t_get();
 # tokens strings
 $lex = new_ok('Parse::FSM::Lexer');
 $lex->from_list(q{'' "" '"' "'" 'hello' "world"}, "\n",
-				"'clo;sed' \"string\" 'with''quote' \"and\"\"quote\"");
+				q{'clo;sed' "string" 'with''quote' "and""quote"}, "\n",
+				q{'quote \\'' "quote \\""}, "\n");
 t_get(undef, 1, STR => "", STR => "", STR => '"', STR => "'", 
 				STR => "hello", STR => "world");
 t_get(undef, 2, STR => "clo;sed", STR => "string", STR => "with", STR => "quote", 
 				STR => "and", STR => "quote");
+t_get(undef, 3, STR => 'quote \'', STR => "quote \"");
 t_get();
 
 #------------------------------------------------------------------------------
