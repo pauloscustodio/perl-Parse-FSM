@@ -1,4 +1,4 @@
-# $Id: Lexer.pm,v 1.7 2013/01/06 23:07:09 Paulo Exp $
+# $Id: Lexer.pm,v 1.8 2013/05/28 22:47:06 Paulo Exp $
 
 package Parse::FSM::Lexer;
 
@@ -19,7 +19,7 @@ use warnings;
 use File::Spec;
 use Data::Dump 'dump';
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 #------------------------------------------------------------------------------
 
@@ -441,17 +441,11 @@ sub get_token {
 			# check for special tokens
 			next unless defined $token;
 			
-			if ($token->[0] eq 'INCLUDE') {
-				eval { $self->from_file($token->[1]) };
-				$self->error($@) if $@;
-				next LINE;
-			}
-			elsif ($token->[0] eq 'INPUT_POS') {
-				@{$self}[ SAW_NL, FILE, LINE_NR, LINE_INC ] =
-						( undef,  @{$token}[1 .. $#$token] );
-			}
-			elsif ($token->[0] eq 'ERROR') {
-				$self->error($token->[1]);
+			my $method = $self->can( $token->[0] );
+			if ($method) {
+				my $new_token = $self->$method($token);
+				return $new_token if defined $new_token;
+				next LINE unless defined $self->[TEXT];	# if context changed
 			}
 			else {
 				return $token;
@@ -462,6 +456,35 @@ sub get_token {
 	}
 }
 
+#------------------------------------------------------------------------------
+# special handlers: return $token to return changed token; return undef to continue loop
+# changeable by subclass
+sub INCLUDE {
+	my($self, $token) = @_;
+	
+	eval { $self->from_file($token->[1]) };
+	$self->error($@) if $@;
+	
+	return;
+}
+
+sub INPUT_POS {
+	my($self, $token) = @_;
+	
+	@{$self}[ SAW_NL, FILE, LINE_NR, LINE_INC ] =
+			( undef,  @{$token}[1 .. $#$token] );
+	
+	return;
+}
+
+sub ERROR {
+	my($self, $token) = @_;
+	
+	$self->error($token->[1]);
+	
+	return;
+}
+	
 #------------------------------------------------------------------------------
 # get next token as [TYPE => VALUE] from the given string reference
 # return undef to ignore a token
@@ -499,10 +522,10 @@ sub tokenizer {
 			)
 			
 			# string
-		|	(?>	( \" [^\\\"]* (?: \\. [^\\\"]* )* \" )
+		|	(?>	( \" (?: \\. | [^\\\"] )* \" )
 										(?{ [STR => eval($^N)] })
 			)
-		|	(?>	( \' [^\\\']* (?: \\. [^\\\']* )* \' )
+		|	(?>	( \' (?: \\. | [^\\\'] )* \' )
 										(?{ [STR => eval($^N)] })
 			)
 			
