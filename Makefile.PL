@@ -26,7 +26,11 @@ WriteMakefile(
 		'Text::Template'		=> 1.45,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'Parse-FSM-*' },
+    clean               => { FILES => [	'Parse-FSM-*',
+										'*.tmp',
+										'*.bak',
+										'~tmpfile.*',
+									  ] },
 );
 
 sub MY::postamble {
