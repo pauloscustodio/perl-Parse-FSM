@@ -1,4 +1,4 @@
-# $Id: Lexer.pm,v 1.8 2013/05/28 22:47:06 Paulo Exp $
+# $Id: Lexer.pm,v 1.9 2013/07/25 01:47:07 Paulo Exp $
 
 package Parse::FSM::Lexer;
 
@@ -19,7 +19,7 @@ use warnings;
 use File::Spec;
 use Data::Dump 'dump';
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 #------------------------------------------------------------------------------
 
@@ -223,7 +223,10 @@ sub from_file {
 	my $input = sub {
 		$fh or return;
 		my $line = <$fh>;
-		return $line if defined $line;
+		if (defined $line) {
+			$line .= "\n" unless $line =~ /\n\z/;	# add \n if missing
+			return $line;
+		}
 		$fh = undef;		# free handle when file ends
 		return;
 	};
@@ -390,12 +393,18 @@ used when the input cannot be tokenized.
 
 #------------------------------------------------------------------------------
 # get the next line from input, set TEXT, return true
+# accumulate lines ending in \\, to allow lexer to handle continuation lines
 sub _readline {
 	my($self) = @_;
 	
 	while (1) {
 		my $input = $self->[INPUT] or return;		# no input, return false
 		if ( defined( $self->[TEXT] = $input->() ) ) {
+			while ( $self->[TEXT] =~ /\\\Z/ ) {
+				my $next_line = $input->();
+				last unless defined $next_line;
+				$self->[TEXT] .= $next_line;
+			}
 			pos($self->[TEXT]) = 0;
 			last;
 		}

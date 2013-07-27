@@ -1,6 +1,6 @@
 #!perl
 
-# $Id: Lexer.t,v 1.2 2011/04/21 08:44:28 Paulo Exp $
+# $Id: Lexer.t,v 1.3 2013/07/25 01:47:23 Paulo Exp $
 
 use 5.010;
 use strict;
@@ -367,6 +367,64 @@ t_get();
 $lex = new_ok('Parse::FSM::Lexer');
 $lex->from_list("0b01 0b10 0b010");
 t_get(undef, 1, NUM => 0b01, NUM => 0b10, NUM => 0b10);
+t_get();
+
+#------------------------------------------------------------------------------
+# lines ended in back-slash
+{
+	package MyLexer;
+	use base 'Parse::FSM::Lexer';
+	sub tokenizer {
+		my($self, $rtext) = @_;
+		our $LINE_NR; local $LINE_NR;
+		
+		$$rtext =~ m{\G
+			(?:
+				# number
+				(?> ( \d+ ) \b 				(?{ [NUM => 0+$^N] }) )
+				
+				# name
+			|	(?> ( [a-z_]\w* )			(?{ [NAME => $^N] }) )
+
+				# backslash-newline sequence
+			|	(?> \\ \n					(?{ undef }) )
+				
+				# newline
+			|	(?> \n						(?{ ["\n" => "\n"] }) )
+			
+				# white space
+			|	(?> (?&SP)+					(?{ undef }) )
+			
+				# others
+			|	(?> ( . )					(?{ [$^N => $^N] }) )
+			)
+		
+			(?(DEFINE)
+				# horizontal blanks
+				(?<SP>	[\t\f\r ] )
+			)
+		}gcxmi or die 'not reached';
+		return $^R;
+	}
+}
+
+$lex = new_ok('Parse::FSM::Lexer');
+
+($fh, $file) = new_tempfile(); 
+print $fh " line 1 \n line 2 \\\n and 3 \n line 4 \\";
+close $fh;
+
+$lex = new_ok('MyLexer');
+$lex->from_file($file);
+
+t_get($file, 1, NAME => 'line', NUM => 1, "\n" => "\n");
+is $lex->[5], " line 1 \n";
+t_get($file, 2, NAME => 'line', NUM => 2);
+is $lex->[5], " line 2 \\\n and 3 \n";
+t_get($file, 3, NAME => 'and', NUM => 3, "\n" => "\n");
+is $lex->[5], " line 2 \\\n and 3 \n";
+t_get($file, 4, NAME => 'line', NUM => 4);
+is $lex->[5], " line 4 \\\n";
 t_get();
 
 #------------------------------------------------------------------------------
