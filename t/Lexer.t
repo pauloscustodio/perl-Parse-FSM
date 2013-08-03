@@ -1,23 +1,84 @@
 #!perl
 
-# $Id: Lexer.t,v 1.3 2013/07/25 01:47:23 Paulo Exp $
+# $Id: Lexer.t,v 1.4 2013/07/27 00:34:39 Paulo Exp $
 
 use 5.010;
 use strict;
 use warnings;
 
 use Test::More;
-use File::Temp 'tempfile';
+use File::Slurp;
 use Data::Dump 'dump';
 
 use_ok 'Parse::FSM::Lexer';
 
 #------------------------------------------------------------------------------
-my $lex;
-my($fh, $file);
+# Globals
+my($lex, $file, $incfile);
+my @TEMP; END { unlink @TEMP };
+my $warn; $SIG{__WARN__} = sub {$warn = shift};
 
 my @input = map {"$_\n"} 1..4;
 my $input = join '', @input;
+
+#------------------------------------------------------------------------------
+sub tmpfile {
+	my $file = "tmp~".scalar(@TEMP)."~";
+	if (@_) {
+		write_file($file, @_);
+	}
+	else {
+		unlink $file; 
+	}
+	push @TEMP, $file;
+	return $file;
+}
+
+#------------------------------------------------------------------------------
+sub t_get {
+	my($file, $line_nr, @tokens) = @_;
+	my $id = "[line ".(caller)[2]."]";
+	
+	$file =~ s/\\/\//g if defined $file;
+	
+	if (@tokens) {
+		while (my($type, $value) = splice(@tokens, 0, 2)) {
+			is_deeply 	$lex->get_token, [$type, $value],
+						"$id [".dump($type)." => ".dump($value)."]";
+	
+			my $lex_file = $lex->file;
+			$lex_file =~ s/\\/\//g if defined $lex_file;
+			
+			is 			$lex_file, $file,			
+						"$id file ".dump($file);
+						
+			is			$lex->line_nr, $line_nr,	
+						"$id line_nr ".dump($line_nr);
+		}
+	}
+	else {
+		is	$lex->get_token, undef, "$id EOF";
+		is	$lex->get_token, undef, "$id EOF";
+	}
+}
+
+#------------------------------------------------------------------------------
+sub t_error { 
+	my($error_msg, $expected_message) = @_;
+	my $line_nr = (caller)[2];
+	my $test_name = "[line $line_nr]";
+
+	(my $expected_error   = $expected_message) =~ s/XXX/Error/;
+	(my $expected_warning = $expected_message) =~ s/XXX/Warning/;
+	
+	eval {	$lex->error($error_msg) };
+	is		$@, $expected_error, "$test_name die()";
+	
+			$warn = "";
+			$lex->warning($error_msg);
+	is 		$warn, $expected_warning, "$test_name warning()";
+	$warn = undef;
+}
 
 #------------------------------------------------------------------------------
 # no input
@@ -26,29 +87,26 @@ t_get();
 
 #------------------------------------------------------------------------------
 # no input file
-($fh, $file) = new_tempfile(); 
-unlink($file."~"); 
+$file = tmpfile();
+eval { Parse::FSM::Lexer->new($file) };
+is $@, "Error : unable to open input file '$file'\n";
 
-eval { Parse::FSM::Lexer->new($file."~") };
-like $@, qr/^Error opening \Q$file~/;
+$incfile = tmpfile();
+$file = tmpfile("#include '$incfile'\n");
+eval { Parse::FSM::Lexer->new($file)->get_token };
+is $@, "Error at file '$file', line 1 : unable to open input file '$incfile'\n";
 
 #------------------------------------------------------------------------------
 # empty input file
-($fh, $file) = new_tempfile(); 
-close $fh;
-
+$file = tmpfile("");
 $lex = new_ok('Parse::FSM::Lexer', [$file]);
 t_get();
 
 #------------------------------------------------------------------------------
 # file with Data
-($fh, $file) = new_tempfile(); 
-print $fh $input;
-close $fh;
-
+$file = tmpfile($input);
 $lex = new_ok('Parse::FSM::Lexer');
 $lex->from_file($file);
-
 t_get($file, 1, NUM => 1);
 t_get($file, 2, NUM => 2);
 t_get($file, 3, NUM => 3);
@@ -57,10 +115,7 @@ t_get();
 
 #------------------------------------------------------------------------------
 # file with Data, pass on constructor
-($fh, $file) = new_tempfile(); 
-print $fh $input;
-close $fh;
-
+$file = tmpfile($input);
 $lex = new_ok('Parse::FSM::Lexer', [$file]);
 t_get($file, 1, NUM => 1);
 t_get($file, 2, NUM => 2);
@@ -200,7 +255,7 @@ t_get();
 $lex = new_ok('Parse::FSM::Lexer', ['t/Data/f03.asm']);
 eval { $lex->get_token };
 
-is $@, "t/Data/f03.asm(1) Error #include expects a file name\n", "wrong syntax";
+is $@, "Error at file 't/Data/f03.asm', line 1 : #include expects a file name\n", "wrong syntax";
 
 #------------------------------------------------------------------------------
 # #include from file
@@ -280,28 +335,26 @@ t_get();
 # recursive include
 $lex = new_ok('Parse::FSM::Lexer', ['t/Data/f07.asm']);
 eval { $lex->get_token };
-is $@, "t/Data/f08.asm(1) Error #include loop\n",
+is $@, "Error at file 't/Data/f08.asm', line 1 : #include loop\n",
 			"#include loop";
 
 #------------------------------------------------------------------------------
 # error
-my $warn; 
-$SIG{__WARN__} = sub {$warn = shift};
 
 $lex = new_ok('Parse::FSM::Lexer');
 
-t_error(undef, "Error\n", "Warning\n");
-t_error("test error", "Error test error\n", "Warning test error\n");
-t_error("test error\n", "Error test error\n", "Warning test error\n");
+t_error(undef, "XXX\n");
+t_error("test error", 	"XXX : test error\n");
+t_error("test error\n", "XXX : test error\n");
 
 $lex->line_nr(1);
-t_error("test error","(1) Error test error\n", "(1) Warning test error\n");
+t_error("test error",	"XXX at line 1 : test error\n");
 
 $lex->file("f1.asm");
-t_error("test error","f1.asm(1) Error test error\n", "f1.asm(1) Warning test error\n");
+t_error("test error",	"XXX at file 'f1.asm', line 1 : test error\n");
 
 $lex->line_nr(0);
-t_error("test error","f1.asm Error test error\n", "f1.asm Warning test error\n");
+t_error("test error",	"XXX at file 'f1.asm' : test error\n");
 
 is $warn, undef, "no warnings";
 
@@ -410,9 +463,7 @@ t_get();
 
 $lex = new_ok('Parse::FSM::Lexer');
 
-($fh, $file) = new_tempfile(); 
-print $fh " line 1 \n line 2 \\\n and 3 \n line 4 \\";
-close $fh;
+$file = tmpfile(" line 1 \n line 2 \\\n and 3 \n line 4 \\"); 
 
 $lex = new_ok('MyLexer');
 $lex->from_file($file);
@@ -427,59 +478,5 @@ t_get($file, 4, NAME => 'line', NUM => 4);
 is $lex->[5], " line 4 \\\n";
 t_get();
 
-#------------------------------------------------------------------------------
+
 done_testing();
-
-
-#------------------------------------------------------------------------------
-# utils
-#------------------------------------------------------------------------------
-
-sub new_tempfile { tempfile("~tmpfile.XXXXXX", UNLINK => 1) }
-
-# file not deleted if $fh still pointing at file handle; delete here
-END { undef $fh; $file and unlink $file };
-
-
-#------------------------------------------------------------------------------
-sub t_get {
-	my($file, $line_nr, @tokens) = @_;
-	my $id = "[line ".(caller)[2]."]";
-	
-	$file =~ s/\\/\//g if defined $file;
-	
-	if (@tokens) {
-		while (my($type, $value) = splice(@tokens, 0, 2)) {
-			is_deeply 	$lex->get_token, [$type, $value],
-						"$id [".dump($type)." => ".dump($value)."]";
-	
-			my $lex_file = $lex->file;
-			$lex_file =~ s/\\/\//g if defined $lex_file;
-			
-			is 			$lex_file, $file,			
-						"$id file ".dump($file);
-						
-			is			$lex->line_nr, $line_nr,	
-						"$id line_nr ".dump($line_nr);
-		}
-	}
-	else {
-		is	$lex->get_token, undef, "$id EOF";
-		is	$lex->get_token, undef, "$id EOF";
-	}
-}
-
-#------------------------------------------------------------------------------
-sub t_error { 
-	my($error_msg, $expected_error, $expected_warning) = @_;
-	my $line_nr = (caller)[2];
-	my $test_name = "[line $line_nr]";
-	
-	eval {	$lex->error($error_msg) };
-	is		$@, $expected_error, "$test_name die()";
-	
-			$warn = "";
-			$lex->warning($error_msg);
-	is 		$warn, $expected_warning, "$test_name warning()";
-	$warn = undef;
-}

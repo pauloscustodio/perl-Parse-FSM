@@ -1,6 +1,7 @@
 Changes
 lib/Parse/FSM.pm
 lib/Parse/FSM/Driver.pm
+lib/Parse/FSM/Error.pm
 lib/Parse/FSM/Lexer.pm
 Makefile.PL
 MANIFEST
@@ -23,6 +24,7 @@ t/Data/include3.z80
 t/Data/sub/f01.asm
 t/Data/sub/f11.asm
 t/Driver.t
+t/Error.t
 t/FSM-error.t
 t/FSM-expression.t
 t/FSM-import.t

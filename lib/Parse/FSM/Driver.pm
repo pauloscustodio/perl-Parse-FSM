@@ -1,4 +1,4 @@
-# $Id: Driver.pm,v 1.9 2013/07/25 01:46:34 Paulo Exp $
+# $Id: Driver.pm,v 1.10 2013/07/27 00:34:39 Paulo Exp $
 
 package Parse::FSM::Driver;
 
@@ -18,7 +18,7 @@ use strict;
 use Carp; our @CARP_NOT = ('Parse::FSM::Driver');
 use Data::Dump 'dump';
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 #------------------------------------------------------------------------------
 

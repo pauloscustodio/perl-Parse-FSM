@@ -1,3 +1,7 @@
+1.10	2013-08-03
+	New Features
+	* Parse::FSM::Error module to format error and warning messages.
+
 1.09	2013-07-27
 	New Features
 	* Accumulate lines that end with backslash with following lines, so 

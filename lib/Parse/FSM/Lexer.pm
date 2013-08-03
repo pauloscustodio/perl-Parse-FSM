@@ -1,4 +1,4 @@
-# $Id: Lexer.pm,v 1.9 2013/07/25 01:47:07 Paulo Exp $
+# $Id: Lexer.pm,v 1.10 2013/07/27 00:34:39 Paulo Exp $
 
 package Parse::FSM::Lexer;
 
@@ -18,8 +18,9 @@ use warnings;
 
 use File::Spec;
 use Data::Dump 'dump';
+use Parse::FSM::Error;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 #------------------------------------------------------------------------------
 
@@ -38,7 +39,8 @@ our $VERSION = '1.09';
   
   $lex->get_token;
   
-  $lex->error(@message); 
+  $lex->error($message); 
+  $lex->warning($message); 
   $lex->file; 
   $lex->line_nr;
   
@@ -213,11 +215,12 @@ sub from_file {
 	
 	# check for include loop
 	if (grep {($_->[FILE] // "") eq $file} @{$self->[STACK]}) {
-		die "#include loop\n";
+		$self->error("#include loop");
 	}
 	
 	# open the file
-	open(my $fh, "<", $file) or die "Error opening $file: $!\n";
+	open(my $fh, "<", $file) 
+		or $self->error("unable to open input file '$file'");
 		
 	# create a new iterator to read file lines
 	my $input = sub {
@@ -471,8 +474,7 @@ sub get_token {
 sub INCLUDE {
 	my($self, $token) = @_;
 	
-	eval { $self->from_file($token->[1]) };
-	$self->error($@) if $@;
+	$self->from_file($token->[1]);
 	
 	return;
 }
@@ -592,8 +594,9 @@ where the error occured.
 
 #------------------------------------------------------------------------------
 sub error { 
-	my($self, @message) = @_;
-	die $self->_error_msg("Error", @message);
+	my($self, $message) = @_;
+	Parse::FSM::Error::error( $self->_error_msg($message), 
+							  $self->[FILE], $self->[LINE_NR] );
 }
 #------------------------------------------------------------------------------
 
@@ -606,19 +609,18 @@ where the warning occured.
 
 #------------------------------------------------------------------------------
 sub warning { 
-	my($self, @message) = @_;
-	warn $self->_error_msg("Warning", @message);
+	my($self, $message) = @_;
+	Parse::FSM::Error::warning( $self->_error_msg($message), 
+							    $self->[FILE], $self->[LINE_NR] );
 }
 
 #------------------------------------------------------------------------------
 # error message for error() and warning()
 sub _error_msg { 
-	my($self, $type, @message) = @_;
-	chomp(@message);
-	my $in_file = defined($self->[FILE]) ? "$self->[FILE]" : undef;
-	my $in_line = $self->[LINE_NR] ? "($self->[LINE_NR])" : undef;
-	my $at = ($in_file || $in_line) ? 
-				join("", grep {defined} $in_file, $in_line) : undef;
+	my($self, $message) = @_;
+	
+	defined($message) and $message =~ s/\s+\z//;
+
 	my $near;
 	if (defined($self->[TEXT]) && defined(pos($self->[TEXT]))) {
 		my $code = substr($self->[TEXT], pos($self->[TEXT]), 20);
@@ -628,7 +630,7 @@ sub _error_msg {
 		}
 	}
 
-	return join(" ", grep {defined} $at, $type, @message, $near), "\n";
+	return join(" ", grep {defined} $message, $near);
 }
 #------------------------------------------------------------------------------
 
