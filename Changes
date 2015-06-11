@@ -1,3 +1,8 @@
+1.11	2015-06-11
+
+	Other
+	* Convert to GIT
+
 1.10	2013-08-03
 	New Features
 	* Parse::FSM::Error module to format error and warning messages.
