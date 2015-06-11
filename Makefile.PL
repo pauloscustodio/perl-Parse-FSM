@@ -1,19 +1,27 @@
 #!perl
 
-use 5.010;
 use strict;
 use warnings;
-
 use ExtUtils::MakeMaker;
+use 5.010;
+my $mm_ver = $ExtUtils::MakeMaker::VERSION;
+if ($mm_ver =~ /_/) {
+    # developer release
+    $mm_ver = eval $mm_ver;
+    die $@ if $@;
+}
 
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
 WriteMakefile(
     NAME                => 'Parse::FSM',
-    AUTHOR              => q{Paulo Custodio <pscust@cpan.org>},
     VERSION_FROM        => 'lib/Parse/FSM.pm',
-    ABSTRACT_FROM       => 'lib/Parse/FSM.pm',
-    ($ExtUtils::MakeMaker::VERSION >= 6.3002
-      ? ('LICENSE'=> 'perl')
-      : ()),
+    DISTNAME            => 'Parse-FSM',
+    ($] >= 5.005 ?       ## Add these new keywords supported since 5.005
+        (
+            ABSTRACT_FROM  => 'lib/Parse/FSM.pm',
+            AUTHOR         => 'Paulo Custodio <pscust@cpan.org>',
+        ) : ()),
     PREREQ_PM => {
 		'Capture::Tiny'			=> 0.10,
 		'Class::XSAccessor'		=> 1.11,
@@ -26,7 +34,31 @@ WriteMakefile(
 		'Text::Template'		=> 1.45,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+
+    ($mm_ver >= 6.48
+        ? (MIN_PERL_VERSION => 5.010)
+        : ()
+    ),
+
+    ($mm_ver >= 6.31 ? (LICENSE => 'perl_5_16') : ()),
+
+    ($mm_ver <= 6.45
+        ? ()
+        : (META_MERGE => {
+            'meta-spec' => { version => 2 },
+            resources => {
+                repository  => {
+                    type => 'git',
+                    url  => 'git://github.com/pauloscustodio/perl-Parse-FSM.git',
+                    web  => 'https://github.com/pauloscustodio/perl-Parse-FSM',
+                },
+            },
+          })
+    ),
+
     clean               => { FILES => [	'Parse-FSM-*',
+
+
 										'*.tmp',
 										'*.bak',
 										'~tmpfile.*',
