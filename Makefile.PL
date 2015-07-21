@@ -57,8 +57,7 @@ WriteMakefile(
     ),
 
     clean               => { FILES => [	'Parse-FSM-*',
-
-
+										'Parser.pm',
 										'*.tmp',
 										'*.bak',
 										'~tmpfile.*',

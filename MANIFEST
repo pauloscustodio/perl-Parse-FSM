@@ -1,3 +1,4 @@
+.gitignore
 Changes
 lib/Parse/FSM.pm
 lib/Parse/FSM/Driver.pm
