@@ -18,7 +18,7 @@ use strict;
 use Carp; our @CARP_NOT = ('Parse::FSM::Driver');
 use Data::Dump 'dump';
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 #------------------------------------------------------------------------------
 

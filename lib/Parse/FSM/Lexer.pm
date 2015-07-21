@@ -20,7 +20,7 @@ use File::Spec;
 use Data::Dump 'dump';
 use Parse::FSM::Error;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 #------------------------------------------------------------------------------
 

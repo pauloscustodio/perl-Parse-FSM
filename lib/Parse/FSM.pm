@@ -20,7 +20,7 @@ use Data::Dump 'dump';
 use Text::Template 'fill_in_string';
 use File::Slurp;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 #------------------------------------------------------------------------------
 
