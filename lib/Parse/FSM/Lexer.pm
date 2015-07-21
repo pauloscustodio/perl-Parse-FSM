@@ -53,7 +53,7 @@ our $VERSION = '1.11';
 =head1 DESCRIPTION
 
 This module implements a generic tokenizer that can be used by
-L<Parse::FSM|Parse::FSM> parsers, and can also be used stand alone 
+L<Parse::FSM|Parse::FSM> parsers, and can also be used standalone 
 independently of the parser. 
 
 It supports recursive file includes and takes track of current file name
@@ -65,7 +65,7 @@ to retrieves the next input token to parse.
 
 The module can be used directly if the supplied tokenizer is enough for the
 application, but usually a derived class has to be written implementing a 
-custom version of the C<tokenizer> method.
+custom version of the  C<tokenizer> method.
 
 =head1 METHODS - SETUP
 
@@ -299,8 +299,8 @@ Returns C<undef> on end of input.
 
 Method responsible to match the next token from the given input string.
 
-This method can be overriden by a child class in order to implement a different
-set ot tokens to be retrieved from the input.
+This method can be overridden by a child class in order to implement a different
+set of tokens to be retrieved from the input.
 
 It is implemented with features from the Perl 5.010 regex engine:
 
@@ -310,7 +310,7 @@ It is implemented with features from the Perl 5.010 regex engine:
 
 one big regex with C</\G.../gc> to match from where the
 last match ended; the string to match is passed as a scalar reference, so that
-the position of last match C<pos()> is preserved;
+the position of last match  C<pos()> is preserved;
 
 =item *
 
@@ -588,7 +588,7 @@ Increment of line number on each new-line found, usually 1.
 =head2 error
 
 Dies with the given error message, indicating the place in the input source file
-where the error occured.
+where the error occurred.
 
 =cut
 
@@ -603,7 +603,7 @@ sub error {
 =head2 warning
 
 Warns with the given error message, indicating the place in the input source file
-where the warning occured.
+where the warning occurred.
 
 =cut
 

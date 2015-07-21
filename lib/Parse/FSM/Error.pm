@@ -32,7 +32,7 @@ our $VERSION = '1.11';
 
 =head1 DESCRIPTION
 
-This module formats an error or warning mesage and displays it on C<STDERR>,
+This module formats an error or warning message and displays it on C<STDERR>,
 exiting with die for C<error>.
 
 =head1 EXPORTS

@@ -52,10 +52,10 @@ our $VERSION = '1.11';
 This module compiles the Finite State Machine used by the
 L<Parse::FSM::Driver|Parse::FSM::Driver> parser module.
 
-It can be used by by a sequence of C<add_rule> calls, or by parsing a yacc-like
+It can be used by a sequence of C<add_rule> calls, or by parsing a yacc-like
 grammar in one go with C<parse_grammar>.
 
-Can be used as a script to generate a module from a grammar file.
+It can be used as a script to generate a module from a grammar file.
 
 The result of compiling the parser can be used immediately by retrieving the 
 C<parser> object, or a pre-compiled module can be written to disk by
@@ -139,7 +139,7 @@ Adds one rule to the parser.
 
   $fsm->add_rule($name, @elems, $action);
 
-C<$name> is the name of the rule, i.e. the syntatic object recognized
+C<$name> is the name of the rule, i.e. the syntactic object recognized
 by the rule. 
 
 C<@elems> is the list of elements in sequence needed to recognize this rule.
@@ -157,12 +157,12 @@ to accept all the input;
 
 =item *
 
-An array refernce of a list of all possible tokens to accept at this position.
+An array reference of a list of all possible tokens to accept at this position.
 
 =item *
 
 A subrule name inside square brackets, optionally followed by a 
-repetion character, that asks the parser to recursively descend 
+repetition character that asks the parser to recursively descend 
 to match that subrule at the current input location.
 
 The accepted forms are:
@@ -184,7 +184,7 @@ C<$action> is the Perl text of the action executed when the rule is recognized,
 i.e. all elements were found in sequence. 
 
 It has to be enclosed in brackets C<{}>, and can use the following lexical 
-variables, that are declared by the generated code:
+variables that are declared by the generated code:
 
 =over 4
 
@@ -195,7 +195,7 @@ C<$self> : object pointer;
 =item *
 
 C<@item> : values of all the tokens or rules identified in this rule. The subrule
-call with repetions return an array reference containing all the found items
+call with repetitions return an array reference containing all the found items
 in the subrule;
 
 =back
@@ -277,7 +277,7 @@ sub _add_list_rule {
 	
 	return "[$subrule]" unless $quant;		# subrule without quatifier
 	
-	# create a list subrule, so that the result of the repetion is returned
+	# create a list subrule, so that the result of the repetition is returned
 	# as an array reference
 	my $list_subrule = $self->_unique_name("_lst_".$subrule);
 	
@@ -475,19 +475,19 @@ Parses the given grammar text and adds to the parser. Example grammar follows:
 
 =item prolog
 
-If the text contains a code block surronded by braces before the first rule
+If the text contains a code block surrounded by braces before the first rule
 definition, the text is copied without the external braces to the prolog
 of generated module.
 
 =item epilog
 
-If the text contains a code block surronded by braces after the last rule
+If the text contains a code block surrounded by braces after the last rule
 definition, the text is copied without the external braces to the epilog
 of generated module.
 
 =item statements
 
-Statement are either rule definitions of directives and end with a 
+Statements are either rule definitions of directives and end with a 
 semi-colon C<;>. Comments are as in Perl, from a hash C<#> sign to 
 the end of the line.
 
@@ -509,7 +509,7 @@ The rule can define several alternative definitions separated by '|'.
 
 The rule definition finishes with a semi-colon ';'.
 
-A rule can call an anonymous sub-rule eclosed in parentheses.
+A rule can call an anonymous sub-rule enclosed in parentheses.
 
 =item action
 
@@ -582,7 +582,7 @@ sub parse_grammar {
 Computes the Finite State Machine to execute the parser and returns a 
 L<Parse::FSM::Driver|Parse::FSM::Driver> object that implements the parser.
 
-Usefull to build the parser and execute it in the same
+Useful to build the parser and execute it in the same
 program, but with the run-time penalty of the time to setup the state tables.
 
 =cut
@@ -763,7 +763,7 @@ sub _table_dump {
 =head1 PRE-COMPILING THE GRAMMAR
 
 The setup of the parsing tables and creating the parsing module may take up
-considerable time. Therefore it is usefull to separate the parser generation 
+considerable time. Therefore it is useful to separate the parser generation 
 phase from the parsing phase.
 
 =head2 precompile
@@ -782,7 +782,7 @@ This is equivalent to the following Perl program:
   use Parse::FSM;
   Parse::FSM->precompile(@ARGV);
 
-The class method C<precompile> receives as argumens the grammar file, the 
+The class method C<precompile> receives as arguments the grammar file, the 
 generated module name and an optional file name, and creates the parsing module.
 
 =cut
