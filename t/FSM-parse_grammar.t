@@ -93,7 +93,7 @@ $fsm = new_ok('Parse::FSM');
 eval {$fsm->parse_grammar(<<'END')};
 	main : term {
 END
-like $@, qr/^Cannot parse code block at "{\\n" at t.FSM-parse_grammar.t/;
+like $@, qr/^Cannot parse code block at "\{\\n" at t.FSM-parse_grammar.t/;
 
 #------------------------------------------------------------------------------
 # rules : syntax error
@@ -101,7 +101,7 @@ $fsm = new_ok('Parse::FSM');
 eval {$fsm->parse_grammar(<<'END')};
 	main : term { { }
 END
-like $@, qr/^Cannot parse code block at "{ { }\\n" at t.FSM-parse_grammar.t/;
+like $@, qr/^Cannot parse code block at "\{ \{ \}\\n" at t.FSM-parse_grammar.t/;
 
 #------------------------------------------------------------------------------
 # rules : syntax error
