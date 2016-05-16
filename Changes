@@ -1,3 +1,11 @@
+1.13	2016-05-16
+
+	Bug Fixes
+	* Unescaped left brace in regex is deprecated
+
+	Other
+	* Add Travis-CI
+
 1.12	2015-07-21
 
 	Other
